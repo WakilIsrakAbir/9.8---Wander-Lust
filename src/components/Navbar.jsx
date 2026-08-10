@@ -27,6 +27,9 @@ const Navbar = () => {
                     <Link href="/destinations" className={getLinkStyle("/destinations")}>
                         Destinations
                     </Link>
+                    <Link href="/add-destinations" className={getLinkStyle("/add-destinations")}>
+                        Add Destinations
+                    </Link>
                     <Link href="/my-bookings" className={getLinkStyle("/my-bookings")}>
                         My Bookings
                     </Link>
