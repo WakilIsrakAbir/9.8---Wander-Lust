@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Select, ListBox } from "@heroui/react";
 
 function DestinationsPage() {
@@ -104,12 +105,12 @@ function DestinationsPage() {
                   </div>
 
                   {/* Book Now Link */}
-                  <a href="#" className="inline-flex items-center gap-1 text-cyan-600 font-medium hover:text-cyan-700 transition-colors uppercase text-sm border-b border-cyan-600/30 pb-0.5">
+                  <Link href={`/destinations/${dest._id}`} className="inline-flex items-center gap-1 text-cyan-600 font-medium hover:text-cyan-700 transition-colors uppercase text-sm border-b border-cyan-600/30 pb-0.5">
                     BOOK NOW
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
                     </svg>
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}
