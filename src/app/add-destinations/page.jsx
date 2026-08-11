@@ -15,7 +15,7 @@ import { useState } from "react";
 const Destination = () => {
   const [isPending, setIsPending] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsPending(true);
     
@@ -24,11 +24,30 @@ const Destination = () => {
     
     console.log("Form Submitted:", data);
     
-    // Simulate an API call
-    setTimeout(() => {
+    try {
+      const response = await fetch("http://localhost:5000/destinations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Destination added successfully:", result);
+        alert("Destination added successfully!");
+        e.target.reset(); // Reset form fields
+      } else {
+        console.error("Failed to add destination");
+        alert("Failed to add destination!");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("Error submitting form!");
+    } finally {
       setIsPending(false);
-      // You can add your database or API submission logic here
-    }, 1500);
+    }
   };
 
   return (
