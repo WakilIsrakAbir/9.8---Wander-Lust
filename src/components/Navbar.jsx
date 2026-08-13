@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const Navbar = () => {
     const pathname = usePathname();
+    const { data: session, isPending } = authClient.useSession();
+
     
     // Helper function for active link styling
     const getLinkStyle = (path) => {
@@ -53,12 +56,28 @@ const Navbar = () => {
                         </svg>
                         Profile
                     </Link>
-                    <Link href="/login" className={`hidden lg:flex ${getLinkStyle("/login")}`}>
-                        Login
-                    </Link>
-                    <Link href="/signup" className={getLinkStyle("/signup")}>
-                        Sign Up
-                    </Link>
+                    {isPending ? (
+                        <div className="text-sm text-gray-500">Loading...</div>
+                    ) : session ? (
+                        <button 
+                            onClick={async () => {
+                                await authClient.signOut();
+                                window.location.reload();
+                            }} 
+                            className="text-sm font-medium text-red-500 hover:text-red-700 cursor-pointer"
+                        >
+                            Logout
+                        </button>
+                    ) : (
+                        <>
+                            <Link href="/login" className={`hidden lg:flex ${getLinkStyle("/login")}`}>
+                                Login
+                            </Link>
+                            <Link href="/register" className={getLinkStyle("/register")}>
+                                Sign Up
+                            </Link>
+                        </>
+                    )}
                 </div>
             </nav>
         </header>
