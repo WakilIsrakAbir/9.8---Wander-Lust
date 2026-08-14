@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { api } from "@/lib/api-proxy";
 
 const Destination = () => {
   const router = useRouter();
@@ -42,7 +43,7 @@ const Destination = () => {
     console.log("Form Submitted:", data);
     
     try {
-      const response = await fetch("http://localhost:5000/destinations", {
+      const result = await api.destinations({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,15 +51,9 @@ const Destination = () => {
         body: JSON.stringify(data),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log("Destination added successfully:", result);
-        alert("Destination added successfully!");
-        e.target.reset(); // Reset form fields
-      } else {
-        console.error("Failed to add destination");
-        alert("Failed to add destination!");
-      }
+      console.log("Destination added successfully:", result);
+      alert("Destination added successfully!");
+      e.target.reset(); // Reset form fields
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Error submitting form!");
@@ -68,9 +63,9 @@ const Destination = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12">
-        <div className="mb-10 text-center">
+    <div className="min-h-screen bg-gray-50/50 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[95%] sm:max-w-4xl mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 md:p-12">
+        <div className="mb-8 md:mb-10 text-center">
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Add New Destination</h1>
           <p className="text-gray-500 mt-2 text-sm">Fill in the details below to create a new travel package.</p>
         </div>

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Select, ListBox } from "@heroui/react";
+import { api } from '@/lib/api-proxy';
 
 function DestinationsPage() {
   const [destinations, setDestinations] = useState([]);
@@ -12,8 +13,7 @@ function DestinationsPage() {
   const [sortBy, setSortBy] = useState('');
 
   useEffect(() => {
-    fetch("http://localhost:5000/destinations")
-      .then(res => res.json())
+    api.destinations()
       .then(data => {
         setDestinations(data);
         setLoading(false);

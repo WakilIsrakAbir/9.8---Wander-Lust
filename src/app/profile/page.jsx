@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import { api } from '@/lib/api-proxy';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -29,8 +30,7 @@ export default function ProfilePage() {
 
     const fetchUserStats = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/bookings/user/${session.user.id}`);
-        const bookings = await res.json();
+        const bookings = await api.bookings_user(session.user.id);
         
         const totalBookings = bookings.length;
         const totalSpent = bookings.reduce((sum, b) => sum + Number(b.price || 0), 0);
@@ -55,9 +55,8 @@ export default function ProfilePage() {
           totalSpent
         });
         
-        const profileRes = await fetch(`http://localhost:5000/profiles/${session.user.id}`);
-        const fetchedProfile = await profileRes.json();
-        if (fetchedProfile.location || fetchedProfile.nationality) {
+        const fetchedProfile = await api.profiles(session.user.id);
+        if (fetchedProfile && (fetchedProfile.location || fetchedProfile.nationality)) {
           setProfileData({
             location: fetchedProfile.location || 'Dhaka, Bangladesh',
             nationality: fetchedProfile.nationality || 'Bangladeshi'
@@ -90,7 +89,7 @@ export default function ProfilePage() {
         await authClient.updateUser({ name: editFormData.name });
       }
 
-      await fetch(`http://localhost:5000/profiles/${session.user.id}`, {
+      await api.profiles(session.user.id, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -235,7 +234,7 @@ export default function ProfilePage() {
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-[95%] sm:max-w-md flex flex-col">
             <div className="flex justify-between items-center p-6 border-b">
               <h2 className="text-xl font-semibold text-gray-800">Edit Profile</h2>
               <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">

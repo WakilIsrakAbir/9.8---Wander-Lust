@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@heroui/react';
+import { api } from '@/lib/api-proxy';
 
 export default function MyBookingsPage() {
   const router = useRouter();
@@ -27,8 +28,7 @@ export default function MyBookingsPage() {
 
     const fetchBookings = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/bookings/user/${session.user.id}`);
-        const data = await res.json();
+        const data = await api.bookings_user(session.user.id);
         setBookings(data);
       } catch (err) {
         console.error("Failed to fetch bookings", err);
@@ -45,10 +45,9 @@ export default function MyBookingsPage() {
     
     setCancelLoadingId(bookingId);
     try {
-      const res = await fetch(`http://localhost:5000/bookings/${bookingId}`, {
+      const data = await api.bookings(bookingId, {
         method: 'DELETE',
       });
-      const data = await res.json();
       if (data.deletedCount > 0) {
         setBookings(prev => prev.filter(b => b._id !== bookingId));
       }
@@ -63,8 +62,7 @@ export default function MyBookingsPage() {
     setViewLoading(true);
     setIsViewModalOpen(true);
     try {
-      const res = await fetch(`http://localhost:5000/destinations/${booking.destinationId}`);
-      const data = await res.json();
+      const data = await api.destinations(booking.destinationId);
       setSelectedBookingDetails(data);
     } catch (err) {
       console.error("Failed to fetch destination details", err);
@@ -143,16 +141,16 @@ export default function MyBookingsPage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-end justify-between mt-auto">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mt-auto gap-4 sm:gap-0">
                     <div className="text-[28px] font-bold text-[#17a2b8] leading-none">
                       ${booking.price}
                     </div>
                     
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                       <Button
                         variant="bordered"
                         radius="none"
-                        className="border-[#ff6b6b] text-[#ff6b6b] hover:bg-red-50 bg-white font-medium px-4 h-9 min-w-0"
+                        className="flex-1 sm:flex-none border-[#ff6b6b] text-[#ff6b6b] hover:bg-red-50 bg-white font-medium px-4 h-9 min-w-0"
                         onClick={() => handleCancel(booking._id)}
                         isLoading={cancelLoadingId === booking._id}
                         startContent={cancelLoadingId !== booking._id && (
@@ -166,7 +164,7 @@ export default function MyBookingsPage() {
                       <Button
                         onClick={() => handleView(booking)}
                         radius="none"
-                        className="bg-[#17a2b8] text-white hover:bg-[#138496] font-medium px-5 h-9 min-w-0"
+                        className="flex-1 sm:flex-none bg-[#17a2b8] text-white hover:bg-[#138496] font-medium px-5 h-9 min-w-0"
                         startContent={
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -211,9 +209,9 @@ export default function MyBookingsPage() {
                   className="w-full h-auto max-h-[400px] object-contain bg-gray-50"
                 />
                 <div className="p-8">
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-4 gap-4 sm:gap-0">
                     <div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">{selectedBookingDetails.destinationName}</h1>
+                      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{selectedBookingDetails.destinationName}</h1>
                       <div className="flex items-center gap-2 text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -222,13 +220,13 @@ export default function MyBookingsPage() {
                         {selectedBookingDetails.country}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right">
                       <div className="text-3xl font-bold text-cyan-600">${selectedBookingDetails.price}</div>
                       <div className="text-gray-500 text-sm">per person</div>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-4 mb-8 py-4 border-y border-gray-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 py-4 border-y border-gray-100">
                     <div>
                       <div className="text-sm text-gray-500 mb-1">Duration</div>
                       <div className="font-medium text-gray-900">{selectedBookingDetails.duration}</div>
