@@ -3,12 +3,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { authClient } from '@/lib/auth-client';
 
 export default function DestinationsDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
   const [destination, setDestination] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const { data: session } = authClient.useSession();
   
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -99,6 +102,43 @@ export default function DestinationsDetailsPage() {
     });
   };
 
+  const handleBooking = () => {
+    if (!session?.user) {
+      router.push('/login');
+      return;
+    }
+
+    setBookingLoading(true);
+    
+    const bookingData = {
+      userId: session.user.id,
+      destinationId: destination._id,
+      destinationName: destination.destinationName,
+      country: destination.country,
+      price: destination.price,
+      departureDate: destination.departureDate,
+      imageUrl: destination.imageUrl
+    };
+
+    fetch('http://localhost:5000/bookings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingData),
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        router.push('/my-bookings');
+      }
+    })
+    .catch(err => {
+      console.error("Failed to book destination", err);
+      setBookingLoading(false);
+    });
+  };
+
   if (loading) {
     return <div className="text-center py-20">Loading...</div>;
   }
@@ -179,8 +219,24 @@ export default function DestinationsDetailsPage() {
           </div>
           
           <div className="mt-10">
-            <button className="w-full bg-cyan-600 text-white py-4 rounded-md font-semibold text-lg hover:bg-cyan-700 transition-colors">
-              Confirm Booking
+            <button 
+              onClick={handleBooking}
+              disabled={bookingLoading}
+              className="w-full bg-cyan-600 text-white py-4 rounded-md font-semibold text-lg hover:bg-cyan-700 transition-colors disabled:opacity-70 flex justify-center items-center gap-2"
+            >
+              {bookingLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : !session?.user ? (
+                "Login to Book"
+              ) : (
+                "Confirm Booking"
+              )}
             </button>
           </div>
         </div>

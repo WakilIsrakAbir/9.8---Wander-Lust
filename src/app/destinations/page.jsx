@@ -7,6 +7,9 @@ import { Select, ListBox } from "@heroui/react";
 function DestinationsPage() {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [priceFilter, setPriceFilter] = useState('');
+  const [sortBy, setSortBy] = useState('');
 
   useEffect(() => {
     fetch("http://localhost:5000/destinations")
@@ -21,6 +24,22 @@ function DestinationsPage() {
       });
   }, []);
 
+  const filteredDestinations = destinations.filter(dest => {
+    if (categoryFilter && dest.category !== categoryFilter) return false;
+    if (priceFilter) {
+      const price = Number(dest.price);
+      if (priceFilter === 'under500' && price >= 500) return false;
+      if (priceFilter === '500-1000' && (price < 500 || price > 1000)) return false;
+      if (priceFilter === 'over1000' && price <= 1000) return false;
+    }
+    return true;
+  }).sort((a, b) => {
+    if (sortBy === 'priceAsc') return Number(a.price) - Number(b.price);
+    if (sortBy === 'priceDesc') return Number(b.price) - Number(a.price);
+    if (sortBy === 'nameAsc') return a.destinationName.localeCompare(b.destinationName);
+    return 0;
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -34,31 +53,61 @@ function DestinationsPage() {
           </p>
         </div>
 
-        {/* Filters Section (Static for now to match UI) */}
+        {/* Filters Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-gray-200 rounded-sm bg-white mb-6">
-          <div className="p-4 border-b md:border-b-0 md:border-r border-gray-200 flex justify-between items-center text-gray-500 text-sm">
-            <span>CATEGORY</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          <div className="relative p-4 border-b md:border-b-0 md:border-r border-gray-200 flex items-center text-gray-500 text-sm">
+            <select 
+              className="w-full appearance-none outline-none bg-transparent cursor-pointer pr-8 uppercase"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="">CATEGORY</option>
+              <option value="Beach">Beach</option>
+              <option value="Mountain">Mountain</option>
+              <option value="City">City</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Cultural">Cultural</option>
+              <option value="Luxury">Luxury</option>
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" className="absolute right-4 h-4 w-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
           </div>
-          <div className="p-4 border-b md:border-b-0 md:border-r border-gray-200 flex justify-between items-center text-gray-500 text-sm">
-            <span>PRICE RANGE</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          <div className="relative p-4 border-b md:border-b-0 md:border-r border-gray-200 flex items-center text-gray-500 text-sm">
+            <select 
+              className="w-full appearance-none outline-none bg-transparent cursor-pointer pr-8 uppercase"
+              value={priceFilter}
+              onChange={(e) => setPriceFilter(e.target.value)}
+            >
+              <option value="">PRICE RANGE</option>
+              <option value="under500">Under $500</option>
+              <option value="500-1000">$500 - $1000</option>
+              <option value="over1000">Over $1000</option>
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" className="absolute right-4 h-4 w-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
           </div>
-          <div className="p-4 flex justify-between items-center text-gray-500 text-sm">
-            <span>SORT BY</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          <div className="relative p-4 flex items-center text-gray-500 text-sm">
+            <select 
+              className="w-full appearance-none outline-none bg-transparent cursor-pointer pr-8 uppercase"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="">SORT BY</option>
+              <option value="priceAsc">Price: Low to High</option>
+              <option value="priceDesc">Price: High to Low</option>
+              <option value="nameAsc">Name: A-Z</option>
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" className="absolute right-4 h-4 w-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
           </div>
         </div>
 
         {/* Showing Count */}
-        <p className="text-gray-500 mb-6">Showing {destinations.length} destinations</p>
+        <p className="text-gray-500 mb-6">Showing {filteredDestinations.length} destinations</p>
 
         {/* Grid Section */}
         {loading ? (
           <div className="text-center py-20">Loading destinations...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {destinations.map((dest, index) => (
+            {filteredDestinations.map((dest, index) => (
               <div key={index} className="bg-white group cursor-pointer">
                 {/* Image Container */}
                 <div className="relative h-64 overflow-hidden">

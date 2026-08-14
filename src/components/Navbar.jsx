@@ -7,6 +7,8 @@ import { authClient } from "@/lib/auth-client";
 const Navbar = () => {
     const pathname = usePathname();
     const { data: session, isPending } = authClient.useSession();
+    
+    const isAdmin = session?.user?.email === 'admin@wanderlust.com';
 
     
     // Helper function for active link styling
@@ -30,15 +32,21 @@ const Navbar = () => {
                     <Link href="/destinations" className={getLinkStyle("/destinations")}>
                         Destinations
                     </Link>
-                    <Link href="/add-destinations" className={getLinkStyle("/add-destinations")}>
-                        Add Destinations
-                    </Link>
-                    <Link href="/my-bookings" className={getLinkStyle("/my-bookings")}>
-                        My Bookings
-                    </Link>
-                    <Link href="/admin" className={getLinkStyle("/admin")}>
-                        Admin
-                    </Link>
+                    {isAdmin && (
+                        <>
+                            <Link href="/add-destinations" className={getLinkStyle("/add-destinations")}>
+                                Add Destinations
+                            </Link>
+                            <Link href="/admin" className={getLinkStyle("/admin")}>
+                                Admin
+                            </Link>
+                        </>
+                    )}
+                    {session && (
+                        <Link href="/my-bookings" className={getLinkStyle("/my-bookings")}>
+                            My Bookings
+                        </Link>
+                    )}
                 </div>
 
                 {/* Center: Brand Logo */}
@@ -50,12 +58,14 @@ const Navbar = () => {
 
                 {/* Right side: Auth Links */}
                 <div className="flex items-center gap-8 ml-auto sm:ml-0">
-                    <Link href="/profile" className={`hidden lg:flex items-center gap-1.5 ${getLinkStyle("/profile")}`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                        </svg>
-                        Profile
-                    </Link>
+                    {session && !isAdmin && (
+                        <Link href="/profile" className={`hidden lg:flex items-center gap-1.5 ${getLinkStyle("/profile")}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                            Profile
+                        </Link>
+                    )}
                     {isPending ? (
                         <div className="text-sm text-gray-500">Loading...</div>
                     ) : session ? (

@@ -10,10 +10,27 @@ import {
   TextArea,
   TextField,
 } from "@heroui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const Destination = () => {
+  const router = useRouter();
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
   const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    if (sessionLoading) return;
+    
+    // Redirect if not admin
+    if (session?.user?.email !== 'admin@wanderlust.com') {
+      router.push('/');
+    }
+  }, [session, sessionLoading, router]);
+
+  if (sessionLoading || session?.user?.email !== 'admin@wanderlust.com') {
+    return <div className="min-h-screen flex items-center justify-center text-gray-500">Checking permissions...</div>;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
